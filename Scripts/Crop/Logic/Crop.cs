@@ -2,12 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// if (CropDetails.hasParticalEffect) EventHandler.CallParticleEffectEvent(CropDetails.effectType, transform.position + cropDetails.effectPos);
 public class Crop : MonoBehaviour
 {
     public CropDetails cropDetails;
     private TileDetails tileDetails;
     private int harvestActionCount;
-
+    
     public void ProcessToolAction(ItemDetails tool, TileDetails tile)
     {
         tileDetails = tile;

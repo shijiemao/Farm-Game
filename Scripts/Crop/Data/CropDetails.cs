@@ -53,6 +53,8 @@ public class CropDetails
     public bool hasParticalEffect;
     //TODO: Effect voice
 
+    public Vector3 effectPos;
+
     public bool CheckToolAvailable(int toolID)
     {
         foreach (var tool in harvestToolItemID)
