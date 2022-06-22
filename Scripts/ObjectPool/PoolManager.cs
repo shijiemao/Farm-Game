@@ -38,11 +38,22 @@ public class PoolManager : MonoBehaviour
 
     private void OnParticleEffectEvent(ParticleEffectType effectType, Vector3 pos)
     {
-        var objPool = effectType switch
+        ObjectPool<GameObject> objPool = effectType switch
         {
             ParticleEffectType.LeavesFalling01 => poolEffectList[0],
             ParticleEffectType.LeavesFalling02 => poolEffectList[1],
             _ => null,
         };
+        
+        GameObject obj = objPool.Get();
+        obj.transform.position = pos;
+        StartCoroutine(ReleaseRoutine(objPool, obj));
+
+    }
+
+    private IEnumerator ReleaseRoutine(ObjectPool<GameObject> pool, GameObject obj)
+    {
+        yield return new WaitForSeconds(1.5f);
+        pool.Release(obj);
     }
 }

@@ -242,6 +242,26 @@ namespace MFarm.Map
                 }
             }
         }
+
+        public bool GetGridDimensions(string sceneName, out Vector2Int gridDimensions, out Vector2Int gridOrigin)
+        {
+            gridDimensions = Vector2Int.zero;
+            gridOrigin = Vector2Int.zero;
+            foreach(var mapData in mapDataList)
+            {
+                if (mapData.sceneName == sceneName)
+                {
+                    gridDimensions.x = mapData.gridWith;
+                    gridDimensions.y = mapData.gridHeight;
+                    gridOrigin.x = mapData.originX;;
+                    gridOrigin.y = mapData.originY;
+
+                    return true;
+                }
+            }
+            return false;
+        }
+        
    
     }
 }
