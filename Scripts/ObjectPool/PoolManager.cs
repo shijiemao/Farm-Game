@@ -10,11 +10,16 @@ public class PoolManager : MonoBehaviour
 
     private void OnEnable()
     {
-        EventHandler.CallParticleEffectEvent += OnParticleEffectEvent; 
+        EventHandler.ParticaleEffectEvent += OnParticaleEffectEvent; 
     }
     private void Disable()
     {
-        EventHandler.CallParticleEffectEvent -= OnParticleEffectEvent; 
+        EventHandler.ParticaleEffectEvent -= OnParticaleEffectEvent; 
+    }
+
+    private void Start()
+    {
+        CreatePool();
     }
 
     private void CreatePool()
@@ -36,19 +41,20 @@ public class PoolManager : MonoBehaviour
         }
     }
 
-    private void OnParticleEffectEvent(ParticleEffectType effectType, Vector3 pos)
+    private void OnParticaleEffectEvent(ParticaleEffectType effectType, Vector3 pos)
     {
         ObjectPool<GameObject> objPool = effectType switch
         {
-            ParticleEffectType.LeavesFalling01 => poolEffectList[0],
-            ParticleEffectType.LeavesFalling02 => poolEffectList[1],
+
+            ParticaleEffectType.LeaveFalling1 => poolEffectList[0],
+            ParticaleEffectType.LeaveFalling2 => poolEffectList[1],
+            ParticaleEffectType.Rock => poolEffectList[2],
+            ParticaleEffectType.ReapableScenery => poolEffectList[3],
             _ => null,
         };
-        
         GameObject obj = objPool.Get();
         obj.transform.position = pos;
         StartCoroutine(ReleaseRoutine(objPool, obj));
-
     }
 
     private IEnumerator ReleaseRoutine(ObjectPool<GameObject> pool, GameObject obj)

@@ -2,13 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-// if (CropDetails.hasParticalEffect) EventHandler.CallParticleEffectEvent(CropDetails.effectType, transform.position + cropDetails.effectPos);
 public class Crop : MonoBehaviour
 {
     public CropDetails cropDetails;
-    private TileDetails tileDetails;
+    public TileDetails tileDetails;
+    public bool CanHarvest =>tileDetails.growthDays>=cropDetails.TotalGrowthDays;
     private int harvestActionCount;
-    
+    private Animator anim;
+    private Transform PlayerTransform=>FindObjectOfType<Player>().transform;
+
     public void ProcessToolAction(ItemDetails tool, TileDetails tile)
     {
         tileDetails = tile;
@@ -16,22 +18,71 @@ public class Crop : MonoBehaviour
         if (requireActionCount == -1) return;
 
         //check whether animation
+        anim = GetComponentInChildren<Animator>();
 
         //click count
         if (harvestActionCount < requireActionCount)
         {
             harvestActionCount ++;
             //Effect and Voice
+            if(anim!=null && cropDetails.hasAnimation)
+            {
+                if(PlayerTransform.position.x < transform.position.x)
+                {
+                    anim.SetTrigger("RotateRight");
+                }
+                else
+                {
+                    anim.SetTrigger("RotateLeft");
+                }
+                
+            }
+            if (cropDetails.hasParticalEffect) 
+                EventHandler.CallParticaleEffectEvent(cropDetails.effectType, transform.position + cropDetails.effectPos);
 
         }
 
         if (harvestActionCount >= requireActionCount)
         {
-            if (cropDetails.generateAtPlayerPosition)//create commodity
+            if (cropDetails.generateAtPlayerPosition || !cropDetails.hasAnimation)//create commodity
             {
                 SpawnHarvestItems();
             }
+            else if(cropDetails.hasAnimation)
+            {
+                if(PlayerTransform.position.x < transform.position.x)
+                {
+                    anim.SetTrigger("FallingRight");
+                }
+                else{
+                    anim.SetTrigger("FallingLeft");
+                }
+                StartCoroutine(HarvestAfterAnimation());
+
+            }
         }
+    }
+    private IEnumerator HarvestAfterAnimation()
+    {
+        while(!anim.GetCurrentAnimatorStateInfo(0).IsName("END"))
+        {
+            yield return null;
+        }
+        SpawnHarvestItems();
+        if (cropDetails.transferItemID > 0)
+        {
+            CreateTransferCrop();
+        }
+
+    }
+
+    private void CreateTransferCrop()
+    {
+        tileDetails.seedItemID = cropDetails.transferItemID;
+        tileDetails.daysSinceLastHarvest = -1;
+        tileDetails.growthDays = 0;
+
+        EventHandler.CallRefreshCurrentMap();
     }
 
     public void SpawnHarvestItems()
@@ -57,7 +108,10 @@ public class Crop : MonoBehaviour
 
                 else //create item in world
                 {
-
+                    var dirX = transform.position.x > PlayerTransform.position.x ? 1: -1;
+                    var spawnPos = new Vector3(transform.position.x +Random.Range(dirX,cropDetails.spawnRadius.x*dirX),
+                    transform.position.y + Random.Range(-cropDetails.spawnRadius.y, cropDetails.spawnRadius.y), 0);
+                    EventHandler.CallInstantiateItemInScene(cropDetails.producedItemID[i],spawnPos);
                 }
             }
         }

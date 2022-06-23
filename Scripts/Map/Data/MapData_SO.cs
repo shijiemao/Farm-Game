@@ -8,7 +8,7 @@ public class MapData_SO : ScriptableObject
 {
 
     [SceneName] public string sceneName;
-    [header("Map Information")]
+    [Header("Map Information")]
     public int gridWith;
     public int gridHeight;
     [Header("Original Point")]

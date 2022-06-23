@@ -33,10 +33,10 @@ public static class EventHandler
         ItemSelectedEvent?.Invoke(itemDetails, isSelected);
     }
     
-    public static event Action<int, int> GameMinuteEvent;
-    public static void CallGameMinuteEvent(int minute, int hour)
+    public static event Action<int, int, int, Season> GameMinuteEvent;
+    public static void CallGameMinuteEvent(int minute, int hour, int day, Season season)
     {
-        GameMinuteEvent?.Invoke(minute, hour);
+        GameMinuteEvent?.Invoke(minute, hour, day, season);
     }
 
     public static event Action<int, Season> GameDayEvent;
@@ -106,11 +106,21 @@ public static class EventHandler
     {
         RefreshCurrentMap?.Invoke();
     }
-
-    public static event Action<ParticleEffectType, Vector3> ParticleEffectEvent;
-    public static void CallParticleEffectEvent(ParticleEffectType effectType, Vector3 pos)
+    public static event Action<ParticaleEffectType, Vector3> ParticaleEffectEvent;
+    public static void CallParticaleEffectEvent(ParticaleEffectType effectType, Vector3 pos)
     {
-        ParticleEffectEvent?.Invoke(effectType, pos);
+        ParticaleEffectEvent?.Invoke(effectType, pos);
     }
+
+    public static event Action GenerateCropEvent;
+    public static void CallGenerateCropEvent()
+    {
+        GenerateCropEvent?.Invoke();
+    }
+
+
+
+
+
 
 }

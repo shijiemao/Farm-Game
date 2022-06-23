@@ -1,5 +1,6 @@
 
 using UnityEngine;
+using System.Collections.Generic;
 [System.Serializable]
 public class ItemDetails
 {
@@ -88,4 +89,28 @@ public class TileDetails
     public int growthDays = -1;
     public int daysSinceLastHarvest=-1;
 
+}
+
+[System.Serializable]
+public class NPCPosition
+{
+    public Transform npc;
+    [SceneName] public string startScene;
+    public Vector3 position;
+}
+
+[System.Serializable]
+public class SceneRoute
+{
+    [SceneName] public string fromSceneName;
+    [SceneName] public string gotoSceneName;
+    public List<ScenePath> scenePathList;
+}
+
+[System.Serializable]
+public class ScenePath
+{
+    public string sceneName;
+    public Vector2Int fromGridCell;
+    public Vector2Int gotoGridCell;
 }

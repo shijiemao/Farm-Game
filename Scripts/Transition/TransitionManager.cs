@@ -43,8 +43,10 @@ namespace MFarm.Transition
             yield return SceneManager.UnloadSceneAsync(SceneManager.GetActiveScene());
             yield return LoadSceneSetActive(sceneName);
             EventHandler.CallMoveToPosition(targetPosition);
-            yield return Fade(0);
+            
             EventHandler.CallAfterSceneLoadedEvent();
+            yield return Fade(0);
+           
             
         }
 

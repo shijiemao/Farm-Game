@@ -52,6 +52,7 @@ public class CropDetails
     public bool hasAnimation;
     public bool hasParticalEffect;
     //TODO: Effect voice
+    public ParticaleEffectType effectType;
 
     public Vector3 effectPos;
 

@@ -15,6 +15,7 @@ namespace MFarm.CropPlant
             EventHandler.PlantSeedEvent += OnPlantSeedEvent;
             EventHandler.AfterSceneLoadedEvent += OnAfterSceneLoadedEvent;
             EventHandler.GameDayEvent += OnGameDayEvent;
+            
         }
 
         private void OnDisable()
@@ -70,7 +71,7 @@ namespace MFarm.CropPlant
                 }
                 dayCounter -= cropDetails.growthDays[i];
             }
-           
+            
             //get current stage Prefab
             GameObject cropPrefab = cropDetails.growthPrefabs[currentStage];
             Sprite cropSprite = cropDetails.growthSprites[currentStage];
@@ -80,6 +81,7 @@ namespace MFarm.CropPlant
             GameObject cropInstance = Instantiate(cropPrefab, pos, Quaternion.identity, cropParent);
             cropInstance.GetComponentInChildren<SpriteRenderer>().sprite = cropSprite;
             cropInstance.GetComponent<Crop>().cropDetails = cropDetails;
+            cropInstance.GetComponent<Crop>().tileDetails = tileDetails;
         }
         
         //Search for item details through ID

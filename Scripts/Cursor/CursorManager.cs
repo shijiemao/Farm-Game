@@ -146,7 +146,9 @@ public class CursorManager : MonoBehaviour
         TileDetails currentTile = GridMapManager.Instance.GetTileDetailsOnMousePosition(mouseGridPos);
         if(currentTile !=null)
         {
+            
             CropDetails currentCrop = CropManager.Instance.GetCropDetails(currentTile.seedItemID);
+            Crop crop = GridMapManager.Instance.GetCropObject(mouseWorldPos);
             switch(currentItem.itemType)
             {
                 case ItemType.Commodity:
@@ -160,7 +162,8 @@ public class CursorManager : MonoBehaviour
                     break;
                 case ItemType.Seed:
                     if (currentTile.daySinceDig > -1 && currentTile.seedItemID == -1) SetCursorValid(); else SetCursorInValid();
-                    break;  
+                    break;
+                  
                 case ItemType.CollectTool:
                     if(currentCrop!= null)
                     {
@@ -170,6 +173,17 @@ public class CursorManager : MonoBehaviour
                     else
                         SetCursorInValid();
                     break;
+                case ItemType.BreakTool:
+                case ItemType.ChopTool:
+                    if(crop!=null)
+                    {
+                        if(crop.CanHarvest&&crop.cropDetails.CheckToolAvailable(currentItem.itemID)) SetCursorValid(); else SetCursorInValid();
+                    }
+                    else SetCursorInValid();
+                    break;
+                case ItemType.ReapTool:
+                    if(GridMapManager.Instance.HaveReapableItemsInRadius(mouseWorldPos, currentItem)) SetCursorValid(); else SetCursorInValid();
+                    break;                        
             }
         }
         else

@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace MFarm.AStar
 {
-    public class AStar : MonoBehaviour
+    public class AStar : Singleton<AStar>
     {
         private GridNodes gridNodes;
         private Node startNode;
@@ -14,15 +14,16 @@ namespace MFarm.AStar
         private int gridHeight;
         private int originX;
         private int originY;
-
         private List<Node> openNodeList;    //当前选中Node周围的8个点
         private HashSet<Node> closedNodeList;   //所有被选中的点
 
         private bool pathFound;
 
 
+
         public void BuildPath(string sceneName, Vector2Int startPos, Vector2Int endPos, Stack<MovementStep> npcMovementStack)
         {
+
             pathFound = false;
 
             if (GenerateGridNodes(sceneName, startPos, endPos))
@@ -31,7 +32,7 @@ namespace MFarm.AStar
                 if (FindShortestPath())
                 {
                     //构建NPC移动路径}
-                    UpdatePathOnMovementStepStack(sceneName, npcMovementStep);
+                    UpdatePathOnMovementStepStack(sceneName, npcMovementStack);
                 }
             }
         }
@@ -93,7 +94,7 @@ namespace MFarm.AStar
         {
             //添加起点
             openNodeList.Add(startNode);
-
+            
             while (openNodeList.Count > 0)
             {//节点排序，Node内涵比较函数
                 openNodeList.Sort();
@@ -102,7 +103,7 @@ namespace MFarm.AStar
 
                 openNodeList.RemoveAt(0);
                 closedNodeList.Add(closeNode);
-
+                
                 if (closeNode == targetNode)
                 {
                     pathFound = true;
@@ -110,6 +111,7 @@ namespace MFarm.AStar
                 }
 
                 //计算周围8个Node补充到OpenList
+                EvaluateNeighbourNodes(closeNode);
             }
 
             return pathFound;

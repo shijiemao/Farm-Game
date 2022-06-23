@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Tilemaps;
+using MFarm.CropPlant;
 
 namespace MFarm.Map
 {
@@ -20,7 +21,8 @@ namespace MFarm.Map
         private Season currentSeason;
 
         private Dictionary<string, TileDetails> tileDetailsDict = new Dictionary<string, TileDetails>();
-        
+        private Dictionary<string, bool> firstLoadDict = new Dictionary<string, bool>();
+        private List<ReapItem> itemsInRadius;
         private Grid currentGrid;
         private void OnEnable()
         {
@@ -41,6 +43,7 @@ namespace MFarm.Map
         {
             foreach (var mapData in mapDataList)
             {
+                firstLoadDict.Add(mapData.sceneName,true);
                 InitTileDetailsDict(mapData);
             }
         }
@@ -51,7 +54,13 @@ namespace MFarm.Map
             digTilemap = GameObject.FindWithTag("dig").GetComponent<Tilemap>();
             waterTilemap = GameObject.FindWithTag("water").GetComponent<Tilemap>();
             
-            //DisplayMap(SceneManager.GetActiveScene().name);
+            if(firstLoadDict[SceneManager.GetActiveScene().name])
+            {
+                //DisplayMap(SceneManager.GetActiveScene().name);
+                EventHandler.CallGenerateCropEvent();
+                firstLoadDict[SceneManager.GetActiveScene().name]=false;
+                
+            }
             RefreshMap();
         }
 
@@ -146,6 +155,7 @@ namespace MFarm.Map
 
             if (currentTile != null)
             {
+                Crop currentCrop = GetCropObject(mouseWorldPos);
                 switch (itemDetails.itemType)
                 {
                     case ItemType.Seed:
@@ -166,16 +176,33 @@ namespace MFarm.Map
                         currentTile.daySinceWatered = 0;
                         break;
                     case ItemType.CollectTool:
-                        Crop currentCrop = GetCropObject(mouseWorldPos);
                         //execute harvest
                         currentCrop.ProcessToolAction(itemDetails, currentTile);
                         break;
+                    case ItemType.BreakTool:    
+                    case ItemType.ChopTool:
+                        currentCrop?.ProcessToolAction(itemDetails, currentCrop.tileDetails);
+                        break;
+                    case ItemType.ReapTool:
+                        var reapCount = 0;
+                        for(int i=0; i<itemsInRadius.Count; i++)
+                        {
+                            EventHandler.CallParticaleEffectEvent(ParticaleEffectType.ReapableScenery, itemsInRadius[i].transform.position + Vector3.up);
+                            itemsInRadius[i].SpawnHarvestItems();
+                            Destroy(itemsInRadius[i].gameObject);
+                            reapCount++;
+                            if(reapCount>=Settings.reapAmount)
+                               break;
+                        }
+                        break;    
+                                 
+
                 }
                 UpdateTileDetails(currentTile);
             }
         }
 
-        private Crop GetCropObject(Vector3 mouseWorldPos)
+        public Crop GetCropObject(Vector3 mouseWorldPos)
         {
             Collider2D[] colliders = Physics2D.OverlapPointAll(mouseWorldPos);
             Crop currentCrop = null;
@@ -185,6 +212,31 @@ namespace MFarm.Map
                     currentCrop = colliders[i].GetComponent<Crop>();
             }
             return currentCrop;
+        }
+        
+        public bool HaveReapableItemsInRadius(Vector3 mouseWorldPos, ItemDetails tool)
+        {
+            itemsInRadius = new List<ReapItem>();
+            Collider2D[] colliders = new Collider2D[20];
+
+            Physics2D.OverlapCircleNonAlloc(mouseWorldPos, tool.itemUseRadius, colliders);
+
+            if(colliders.Length>0)
+            {
+                for(int i = 0; i<colliders.Length; i++)
+                {
+                    if(colliders[i]!=null)
+                    {
+                        if(colliders[i].GetComponent<ReapItem>())
+                        {
+                            var item = colliders[i].GetComponent<ReapItem>();
+                            itemsInRadius.Add(item);
+                        }
+                    }
+                }
+            }
+            return itemsInRadius.Count>0;
+
         }
         // dig grid
         private void SetDigGround(TileDetails tile)
@@ -202,12 +254,16 @@ namespace MFarm.Map
                 waterTilemap.SetTile(pos, waterTile);
         }
 
-        private void UpdateTileDetails(TileDetails tileDetails)
+        public void UpdateTileDetails(TileDetails tileDetails)
         {
             string key = tileDetails.gridX + "x" + tileDetails.gridY + "y" + SceneManager.GetActiveScene().name;
             if (tileDetailsDict.ContainsKey(key))
             {
                 tileDetailsDict[key] = tileDetails;
+            }
+            else
+            {
+                tileDetailsDict.Add(key, tileDetails);
             }
         }
 
@@ -242,6 +298,8 @@ namespace MFarm.Map
                 }
             }
         }
+   
+    
 
         public bool GetGridDimensions(string sceneName, out Vector2Int gridDimensions, out Vector2Int gridOrigin)
         {
@@ -261,7 +319,6 @@ namespace MFarm.Map
             }
             return false;
         }
-        
    
     }
 }
